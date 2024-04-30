@@ -10,13 +10,10 @@ void newBlock(Block* block)
     block->code = NULL;
 }
 
-void* expandBlock(void* pointer, size_t oldLength, size_t newLength)
+void* expandBlock(void* pointer, size_t oldLength)
 {
-    if (newLength == 0)
-    {
-        free(pointer);
-        return NULL;
-    }
+
+    int newLength = oldLength < SIZE ? SIZE : SIZE * GROW;
 
     void* block = realloc(pointer, newLength);
     return block;
@@ -26,7 +23,7 @@ void writeBlock(Block* block, uint8_t byte)
 {
     if (block->capacity < block->length + 1)
     {
-        expandBlock(block);
+        expandBlock(block, sizeof(type(byte)) * block->length);
     }
 
     printf("%d", block->capacity);
