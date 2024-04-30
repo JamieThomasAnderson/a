@@ -2,6 +2,8 @@
 #include <stdlib.h>
 #include <string.h>
 
+#include "block.h"
+
 static void repl() {
   char line[1024];
   for (;;) {
@@ -49,25 +51,30 @@ static void runFile(const char *path) {
   // InterpretResult result = interpret(source);
   free(source);
 
-  if (result == INTERPRET_COMPILE_ERROR)
-    exit(65);
-  if (result == INTERPRET_COMPILE_ERROR)
-    exit(70);
+  // if (result == INTERPRET_COMPILE_ERROR)
+  //   exit(65);
+  // if (result == INTERPRET_COMPILE_ERROR)
+  //   exit(70);
 }
 
 int main(int argc, const char *argv[]) {
 
-  initVM();
+  // initVM();
 
-  if (argc == 1) {
-    repl();
-  } else if (argc == 2) {
-    runFile(argv[1]);
-  } else {
-    fprintf(stderr, "Usage: cas [path]\n");
-    exit(64);
-  }
+  // if (argc == 1) {
+  //   repl();
+  // } else if (argc == 2) {
+  //   runFile(argv[1]);
+  // } else {
+  //   fprintf(stderr, "Usage: cas [path]\n");
+  //   exit(64);
+  // }
 
-  freeVM();
+  // freeVM();
+  Block block;
+  newBlock(&block);
+
+  writeBlock(&block, OP_RETURN);
+
   return 0;
 }
