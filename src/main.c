@@ -2,6 +2,9 @@
 #include <stdlib.h>
 #include <string.h>
 
+#include <editline/readline.h>
+#include <editline/history.h>
+
 #include "a.h"
 
 static char input[2048];
@@ -12,10 +15,11 @@ int main(int argc, const char *argv[]) {
   
   while(1)
   {
-    fputs("a> ", stdout);
-    fgets(input, 2048, stdin);
-    printf("You Said: %s", input);
-    
+    // change
+    char * input = readline("a> ");
+    add_history(input);
+    printf("YOU SAID: %s\n", input);
+    free(input);
   }
 
   return 0;
