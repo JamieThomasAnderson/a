@@ -33,6 +33,10 @@
 
 #include <SDL.h>
 
+#include "arr.h"
+#include "section.h"
+
+
 // Define MAX and MIN macros
 #define MAX(X, Y) (((X) > (Y)) ? (X) : (Y))
 #define MIN(X, Y) (((X) < (Y)) ? (X) : (Y))
@@ -85,13 +89,28 @@ SDL_Window * create_window(int width, int height, const char* name)
   return window;
 }
 
+// array of the bounding boxes of the sections
+void add_window_section()
+{
+    static Array window_sections;
+    static bool is_init = false;
+    Section new = {0, 0, 10, 10};
+
+    if ( !is_init )
+    {
+        init_array(&window_sections, 2, sizeof(Section));
+        is_init = true;
+    }
+    
+    insert_array(&window_sections, &new);
+    return;
+}
+
 int main(int argc, char* argv[])
 {
     // Unused argc, argv
     (void) argc;
     (void) argv;
-
-
 
     init();
 
@@ -118,6 +137,8 @@ int main(int argc, char* argv[])
         SDL_RenderClear(renderer);
         SDL_RenderPresent(renderer);
     }
+
+    add_window_section();
 
     SDL_DestroyRenderer(renderer);
     SDL_DestroyWindow(window);
