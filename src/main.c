@@ -33,9 +33,7 @@
 
 #include <SDL.h>
 
-#include "arr.h"
-#include "section.h"
-
+#include "model.h"
 
 // Define MAX and MIN macros
 #define MAX(X, Y) (((X) > (Y)) ? (X) : (Y))
@@ -66,7 +64,7 @@ void init()
 #endif
 }
 
-SDL_Window * create_window(int width, int height, const char* name)
+SDL_Window * createWindow(int width, int height, const char* name)
 {
   SDL_Window *window = SDL_CreateWindow(
     name,
@@ -89,22 +87,6 @@ SDL_Window * create_window(int width, int height, const char* name)
   return window;
 }
 
-// array of the bounding boxes of the sections
-void add_window_section()
-{
-    static Array window_sections;
-    static bool is_init = false;
-    Section new = {0, 0, 10, 10};
-
-    if ( !is_init )
-    {
-        init_array(&window_sections, 2, sizeof(Section));
-        is_init = true;
-    }
-    
-    insert_array(&window_sections, &new);
-    return;
-}
 
 int main(int argc, char* argv[])
 {
@@ -114,7 +96,7 @@ int main(int argc, char* argv[])
 
     init();
 
-    SDL_Window* window = create_window(SCREEN_WIDTH, SCREEN_HEIGHT, "a - Text Editor");
+    SDL_Window* window = createWindow(SCREEN_WIDTH, SCREEN_HEIGHT, "a - Text Editor");
     SDL_Renderer *renderer = SDL_CreateRenderer(window, -1, SDL_RENDERER_ACCELERATED);
     if(!renderer)
     {
@@ -123,6 +105,14 @@ int main(int argc, char* argv[])
     }
 
     bool running = true;
+
+    SDL_Rect rootRect = {0, 0, SCREEN_WIDTH, SCREEN_HEIGHT};
+    Node *root = createNode(rootRect, NULL);
+
+    SDL_Rect childRect = {0, 0, SCREEN_WIDTH / 2, SCREEN_HEIGHT / 2};
+    Node* child1 = createNode(childRect, root);
+
+    addNode(root, child1);
 
     while (running)
     {
@@ -135,10 +125,12 @@ int main(int argc, char* argv[])
         
         SDL_SetRenderDrawColor(renderer, 0xFF, 0xFF, 0xFF, 0xFF);
         SDL_RenderClear(renderer);
+
+        SDL_SetRenderDrawColor(renderer, 0x00, 0x00, 0x00, 0xFF);
+        SDL_RenderFillRect(renderer, &root->rect);
+
         SDL_RenderPresent(renderer);
     }
-
-    add_window_section();
 
     SDL_DestroyRenderer(renderer);
     SDL_DestroyWindow(window);
