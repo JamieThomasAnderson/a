@@ -34,6 +34,7 @@
 #include <SDL.h>
 
 #include "model.h"
+#include "render.h"
 
 // Define MAX and MIN macros
 #define MAX(X, Y) (((X) > (Y)) ? (X) : (Y))
@@ -88,6 +89,7 @@ SDL_Window * createWindow(int width, int height, const char* name)
 }
 
 
+
 int main(int argc, char* argv[])
 {
     // Unused argc, argv
@@ -106,13 +108,11 @@ int main(int argc, char* argv[])
 
     bool running = true;
 
-    SDL_Rect rootRect = {0, 0, SCREEN_WIDTH, SCREEN_HEIGHT};
-    Node *root = createNode(rootRect, NULL);
 
-    SDL_Rect childRect = {0, 0, SCREEN_WIDTH / 2, SCREEN_HEIGHT / 2};
-    Node* child1 = createNode(childRect, root);
-
-    addNode(root, child1);
+    Node* root = createNodeRect(SCREEN_WIDTH, SCREEN_HEIGHT, 0, 0, 0, 255, 0, 255);
+    Node* child = createNodeRect(SCREEN_WIDTH / 2, SCREEN_HEIGHT / 2, 0, 0, 255, 0, 0, 255);
+    addChild(root, child);
+    
 
     while (running)
     {
@@ -125,9 +125,7 @@ int main(int argc, char* argv[])
         
         SDL_SetRenderDrawColor(renderer, 0xFF, 0xFF, 0xFF, 0xFF);
         SDL_RenderClear(renderer);
-
-        SDL_SetRenderDrawColor(renderer, 0x00, 0x00, 0x00, 0xFF);
-        SDL_RenderFillRect(renderer, &root->rect);
+        renderWM(renderer, root);
 
         SDL_RenderPresent(renderer);
     }
@@ -135,5 +133,7 @@ int main(int argc, char* argv[])
     SDL_DestroyRenderer(renderer);
     SDL_DestroyWindow(window);
     SDL_Quit();
+
+    freeWM(root);
     return 0;
 }

@@ -3,12 +3,21 @@
 
 #include "model.h"
 
-Node *createNode(SDL_Rect rect, Node *parent) 
+Node *createNodeRect(int width, int height, int x, int y, int r, int g, int b, int a) 
 {
+    printf("%d", width);
+    SDL_Rect rect = {x, y, width, height};
+    SDL_Color color = {r, g, b, a};
+    
     Node* node = (Node*)malloc(sizeof(Node));
-    node->rect = rect;
-    node->parent = parent;
+    
+    node->component.rect = rect;
+    node->color = color;
+    node->type = RECT;
+
+    node->parent = NULL;
     node->numChildren = 0;
+    
     for (int i = 0; i < MAX_CHILDREN; i++) 
     {
         node->children[i] = NULL;
@@ -17,8 +26,16 @@ Node *createNode(SDL_Rect rect, Node *parent)
     return node;
 }
 
-void addNode(Node* parent, Node* child) 
+void addChild(Node* parent, Node* child) 
 {
+    if (child == NULL) return;
+
+    if (parent->type != RECT)
+    {
+        printf(" Node has no bounding box, must be RECT! \n");
+        return;
+    }
+
     if (parent->numChildren < MAX_CHILDREN) 
     {
         parent->children[parent->numChildren] = child;
@@ -40,3 +57,4 @@ void freeWM(Node *node)
     } 
     free(node);
 }
+
