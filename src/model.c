@@ -5,7 +5,6 @@
 
 Node *createNodeRect(int width, int height, int x, int y, int r, int g, int b, int a) 
 {
-    printf("%d", width);
     SDL_Rect rect = {x, y, width, height};
     SDL_Color color = {r, g, b, a};
     

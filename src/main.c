@@ -30,11 +30,15 @@
 
 #include <stdio.h>
 #include <stdbool.h>
+#include <string.h>
+
 
 #include <SDL.h>
+#include <SDL_ttf.h>
 
 #include "model.h"
 #include "render.h"
+
 
 // Define MAX and MIN macros
 #define MAX(X, Y) (((X) > (Y)) ? (X) : (Y))
@@ -43,6 +47,7 @@
 // Define screen dimensions
 #define SCREEN_WIDTH    800
 #define SCREEN_HEIGHT   600
+#define LINE_HEIGHT     20
 
 void init()
 {
@@ -88,7 +93,61 @@ SDL_Window * createWindow(int width, int height, const char* name)
   return window;
 }
 
+void renderText(SDL_Renderer* ren, TTF_Font* font, const char* text) {
+    SDL_Color color = {255, 255, 255, 255};
+    int y = 0;
 
+    char* textCopy = strdup(text);
+    char* line = strtok(textCopy, "\n");
+
+    while (line) {
+        printf("%ld\n", strlen(line));
+        SDL_Surface* surface = TTF_RenderText_Blended(font, line, color);
+        if (surface == NULL) {
+            printf("TTF_RenderText_Solid Error: %s\n", TTF_GetError());
+            free(textCopy);
+            return;
+        }
+
+        SDL_Texture* texture = SDL_CreateTextureFromSurface(ren, surface);
+        SDL_FreeSurface(surface);
+        if (texture == NULL) {
+            printf("SDL_CreateTextureFromSurface Error: %s\n", SDL_GetError());
+            free(textCopy);
+            return;
+        }
+
+        int texW = 0;
+        int texH = 0;
+        SDL_QueryTexture(texture, NULL, NULL, &texW, &texH);
+
+        SDL_Rect dst;
+        dst.x = 0;
+        dst.y = y;
+        dst.w = texW;
+        dst.h = texH;
+
+        SDL_RenderCopy(ren, texture, NULL, &dst);
+        SDL_DestroyTexture(texture);
+
+        y += LINE_HEIGHT; // Move down for the next line
+        line = strtok(NULL, "\n");
+    }
+
+    free(textCopy);
+}
+
+void loadFile(const char* filename, char* buffer, size_t bufferSize) {
+    FILE* file = fopen(filename, "r");
+    if (file == NULL) {
+        printf("Could not open file: %s\n", filename);
+        return;
+    }
+
+    size_t bytesRead = fread(buffer, 1, bufferSize - 1, file);
+    buffer[bytesRead] = '\0'; // Null-terminate the string
+    fclose(file);
+}
 
 int main(int argc, char* argv[])
 {
@@ -107,33 +166,72 @@ int main(int argc, char* argv[])
     }
 
     bool running = true;
+    // FONT STUFF
+    if (TTF_Init() == -1) {
+        printf("TTF_Init Error: %s\n", TTF_GetError());
+        SDL_DestroyRenderer(renderer);
+        SDL_DestroyWindow(window);
+        SDL_Quit();
+        return 1;
+    }
 
+    TTF_Font* font = TTF_OpenFont("../fonts/Consolas.ttf", 16);
+    if (font == NULL) {
+        printf("TTF_OpenFont Error: %s\n", TTF_GetError());
+        TTF_Quit();
+        SDL_DestroyRenderer(renderer);
+        SDL_DestroyWindow(window);
+        SDL_Quit();
+        return 1;
+    }
 
-    Node* root = createNodeRect(SCREEN_WIDTH, SCREEN_HEIGHT, 0, 0, 0, 255, 0, 255);
-    Node* child = createNodeRect(SCREEN_WIDTH / 2, SCREEN_HEIGHT / 2, 0, 0, 255, 0, 0, 255);
-    addChild(root, child);
+    SDL_StartTextInput();
+
+    char text[1024 * 10] = "";
+    loadFile("../fonts/test.txt", text, sizeof(text));
+    SDL_Event e;
     
+    // Node* root = createNodeRect(SCREEN_WIDTH, SCREEN_HEIGHT, 0, 0, 0, 255, 0, 255);
+    // Node* child = createNodeRect(SCREEN_WIDTH / 2, SCREEN_HEIGHT / 2, 0, 0, 255, 0, 0, 255);
+    // Node* childchild = createNodeRect((SCREEN_WIDTH / 2) - 100, (SCREEN_HEIGHT /2)-100, 0, 0, 0, 0, 255, 255);
+    // addChild(root, child);
+    // addChild(root, childchild);
+    
+
+
 
     while (running)
     {
-        SDL_Event event;
-        SDL_WaitEvent(&event);
-        if (event.type == SDL_QUIT)
+        while (SDL_PollEvent(&e) != 0)
         {
-            running = false;
+            if (e.type == SDL_QUIT) {
+                running = false;
+            } else if (e.type == SDL_TEXTINPUT) {
+                strcat(text, e.text.text); // Append new text
+            } else if (e.type == SDL_KEYDOWN) {
+                if (e.key.keysym.sym == SDLK_BACKSPACE && strlen(text) > 0) {
+                    text[strlen(text) - 1] = '\0'; // Remove last character
+                } else if (e.key.keysym.sym == SDLK_RETURN) {
+                    strcat(text, "\n"); // Add a newline character
+                }
+            }
         }
         
-        SDL_SetRenderDrawColor(renderer, 0xFF, 0xFF, 0xFF, 0xFF);
+        SDL_SetRenderDrawColor(renderer, 0, 0, 0, 0xFF);
         SDL_RenderClear(renderer);
-        renderWM(renderer, root);
+        // renderWM(renderer, root);
+        renderText(renderer, font, text);
 
         SDL_RenderPresent(renderer);
     }
 
+    SDL_StopTextInput();
+    TTF_CloseFont(font);
+    TTF_Quit();
+
     SDL_DestroyRenderer(renderer);
     SDL_DestroyWindow(window);
     SDL_Quit();
-
-    freeWM(root);
+    //freeWM(root);
     return 0;
 }
