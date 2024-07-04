@@ -191,11 +191,11 @@ int main(int argc, char* argv[])
     loadFile("../fonts/test.txt", text, sizeof(text));
     SDL_Event e;
     
-    // Node* root = createNodeRect(SCREEN_WIDTH, SCREEN_HEIGHT, 0, 0, 0, 255, 0, 255);
-    // Node* child = createNodeRect(SCREEN_WIDTH / 2, SCREEN_HEIGHT / 2, 0, 0, 255, 0, 0, 255);
-    // Node* childchild = createNodeRect((SCREEN_WIDTH / 2) - 100, (SCREEN_HEIGHT /2)-100, 0, 0, 0, 0, 255, 255);
-    // addChild(root, child);
-    // addChild(root, childchild);
+    Node* root = createNodeRect(SCREEN_WIDTH, SCREEN_HEIGHT, 0, 0, 0, 255, 0, 255);
+    Node* child = createNodeRect(SCREEN_WIDTH / 2, SCREEN_HEIGHT / 2, 0, 0, 255, 0, 0, 255);
+    Node* childchild = createNodeRect((SCREEN_WIDTH / 2) - 100, (SCREEN_HEIGHT /2)-100, 0, 0, 0, 0, 255, 255);
+    addChild(root, child);
+    addChild(root, childchild);
     
 
 
@@ -219,7 +219,7 @@ int main(int argc, char* argv[])
         
         SDL_SetRenderDrawColor(renderer, 0, 0, 0, 0xFF);
         SDL_RenderClear(renderer);
-        // renderWM(renderer, root);
+        renderWM(renderer, root);
         renderText(renderer, font, text);
 
         SDL_RenderPresent(renderer);
